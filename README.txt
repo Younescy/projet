@@ -20,3 +20,8 @@ Exemple:
 le programme vous demande de saisir le nom du livre que vous voulez ajouter à la liste de livre.
 Vous ecrivez le nom de ce livre , vous appuyez sur Entrée mais rien ne se passe.
 Réecrivez simplement le nom du livre que vous voulez ajouter. 
+
+Nous avons essayé de faire le timer pour la restitution mais nous avons échoué.
+
+SI VOUS AVEZ UN QUELCONQUE PROBLEME:
+executez de nouveau les fichiers init_user.c et init_livres.c.

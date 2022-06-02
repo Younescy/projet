@@ -8,13 +8,16 @@
 #define maxprof 5
 
 FILE *globaluserfile;
+unsigned long debut;
+unsigned long fin;
 
  struct livre{
 	char titre[30];
 	char auteur[30];
 	int id;
 	char categorie[30];
-	int signed long  dateemprunt;
+	unsigned long  dateemprunt;
+	unsigned long  daterestitution;
 	char emprunteur[30];
 };
 struct user{
@@ -65,6 +68,7 @@ int duree_s(time_t xtime)
     double seconds = difftime(now,xtime);
     return seconds;
 }
+
 
 
 int creat(){
@@ -139,7 +143,7 @@ int creat(){
 	 fclose(outfile);
 }
 
-int emprunter(){
+void emprunter(){
 	FILE *infile;
         struct livre input1;
 	char title[30];
@@ -185,8 +189,6 @@ int emprunter(){
 	}
 
 	strcpy(input1.emprunteur, globaluser.username);
-	time(&now);
-	input1.dateemprunt=now;	
 	printf("info - emprunteur: %s\n",  input1.emprunteur);
 	printf("info - titre     : %s\n",  input1.titre);	
 		
@@ -197,6 +199,7 @@ int emprunter(){
     else
 		 printf("Erreur d ecriture des donnees !\n");
 	
+	input1.dateemprunt = getTimeMicroSec()/1000000;
 	globaluser.nblivres ++;
 	fseek(globaluserfile, -sizeof(struct user), SEEK_CUR);
 	if(fwrite (&globaluser, sizeof(struct user), 1, globaluserfile) != 0)
@@ -217,7 +220,7 @@ int restituer(){
     struct livre input1;
 	char title[30];
 	int nbemprunts;
-	time_t now;
+	unsigned long duree;
     // open file for writing
     infile = fopen ("livre.dat", "r+");
 	if (globaluser.nblivres==0){
@@ -269,9 +272,11 @@ int restituer(){
     else
 		 printf("Erreur d ecriture des donnees !\n");
 	 
-	time(&now);
-	if ((duree_s(input1.dateemprunt) > 180 && globaluser.role==1) || (duree_s(input1.dateemprunt) > 120 && globaluser.role==2))
-	{ printf("Vous avez depasse le temps autorise d'emprunt, vous serez interdit  d'emprunt dorenavant !\n");
+	input1.daterestitution = getTimeMicroSec()/1000000;
+	fin = (input1.daterestitution-input1.dateemprunt);
+
+	if (fin > 180 && (globaluser.role==1) || fin > 120 && (globaluser.role==2))
+	{ printf("Vous avez depasse le temps autorise d'emprunt, vous serez interdit  		d'emprunt dorenavant !\n");
 	  globaluser.retard=1;
 	}
     globaluser.nblivres --;

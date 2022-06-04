@@ -24,8 +24,8 @@ int main ()
     }
  
     struct user input1 = {"Younes", "Younes1234@",2,0,0};
-    struct user input2 = {"professeur", "Professeur1234@",1,0,0};
-    struct user input3 = {"eleve", "Eleve1234@",2,0,0};
+    struct user input2 = {"Professeur", "Professeur1234@",1,0,0};
+    struct user input3 = {"Eleve", "Eleve1234@",2,0,0};
      
     // write struct to file
     fwrite (&input1, sizeof(struct user), 1, outfile);

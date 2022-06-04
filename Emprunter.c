@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-#include <sys/time.h>
 #define maxeleve 3
 #define maxprof 5
 
@@ -16,10 +15,10 @@ unsigned long fin;
 	char auteur[30];
 	int id;
 	char categorie[30];
-	unsigned long  dateemprunt;
-	unsigned long  daterestitution;
+	time_t  dateemprunt;
 	char emprunteur[30];
 };
+
 struct user{
 	char username[30];
 	char mdp[30];
@@ -27,7 +26,9 @@ struct user{
 	int nblivres;
 	int retard;
 };
+
 struct user globaluser;
+
 unsigned long getTimeMicroSec(){
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
@@ -61,7 +62,7 @@ int lire(char *chaine, int longueur)
     }
 }
 
-int duree_s(time_t xtime)
+unsigned long duree_s(time_t xtime)
 {
     time_t now;
     time(&now);
@@ -85,6 +86,7 @@ int creat(){
     printf("Choisir votre pseudo:\n");
     lire(login, 30);
 	printf("info : votre login : %s \n", login);
+	tri();
 	// strcat(login, "\n");
     while(fread(&globaluser, sizeof(struct user), 1, outfile) && strcmp(globaluser.username,login))
     {
@@ -121,60 +123,75 @@ int creat(){
                 digit++;
             }
             //Makes sure password has a symbol
-            if (globaluser.mdp[i] == '!' || globaluser.mdp[i] == '@' || globaluser.mdp[i] == '#' || globaluser.mdp[i] == '$' || globaluser.mdp[i] == '%' || globaluser.mdp[i] == '^' || globaluser.mdp[i] == '&' || globaluser.mdp[i] == '*' || globaluser.mdp[i] == '(' || globaluser.mdp[i] == ')' || globaluser.mdp[i] == '-' || globaluser.mdp[i] == '+' || globaluser.mdp[i] == '_'){
+            if (globaluser.mdp[i] == '!' || globaluser.mdp[i] == '@' || globaluser.mdp[i] == '#' || globaluser.mdp[i] == '$' || globaluser.mdp[i] == '%' || globaluser.mdp[i] == '&' || globaluser.mdp[i] == '*' || globaluser.mdp[i] == '(' || globaluser.mdp[i] == ')' || globaluser.mdp[i] == '-' || globaluser.mdp[i] == '+' || globaluser.mdp[i] == '_'){
 				symbol++;
             }
         }
         if ( (strlen(globaluser.mdp)>8) && digit > 0 && upper > 0 && lower > 0 && letter > 0 && symbol > 0) {
 		complexe=1;}
 		else {
-          printf ("Mot de passe incorrect, minimum 8 caracteres, une majuscule, une miuniscule et un symbole parmi !@#$%^*()-+_ \n");	
+          printf ("Mot de passe incorrect, minimum 8 caracteres, une majuscule, une miniscule et un symbole parmi !@#$%*()-+_ \n");	
         }
     }
 
     printf("Enregistrement en cours...\n");
     fwrite (&globaluser, sizeof(struct user), 1, outfile);
-    if(fwrite != 0){
+    if(fwrite == 1){
         printf("\nDonnees enregistrees avec succces !\n");
 	}
     else{
         printf("Erreur d ecriture des donnees  !\n");
 	}
 	 fclose(outfile);
+	 return;
 }
 
 void emprunter(){
 	FILE *infile;
-        struct livre input1;
+	FILE *infiletri;
+    struct livre input1;
 	char title[30];
-	int nbemprunts;
-	time_t now;
+	char tmp[30];
+	time_t my_time;
 	printf("info : Emprunt pour %s\n",globaluser.username);
     // open file for writing
+	tri();
     infile = fopen ("livre.dat", "r+");
     
 	if (globaluser.retard > 0){
-		printf("Vous n'avez plus le droit d'emprunter à cause de votre retard enregistre");
+		printf("Vous n'avez plus le droit d'emprunter à cause de votre retard enregistre\n");
 		exit(1);
 	}
 	
+	infile = fopen ("livre.dat", "r+");	
 	if (infile == NULL)
-    {   fprintf(stderr, "\nErreur ouverture du fichier \n");
+    {   fprintf(stderr, "\nErreur ouverture du fichier livre \n");
         exit(1);
     }
+	printf("\n ----liste des livres----:\n");
 	while(fread(&input1, sizeof(struct livre), 1, infile))
 	{
-		printf (" id = -%d- titre = -%s- emprunteur -%s- auteur -%s- categorie -%s-\n", input1.id, input1.titre,input1.emprunteur, input1.auteur, input1.categorie);
+		printf (" id = -%d- titre = -%s- emprunteur -%s- categorie -%s- auteur -%s- datemprunt %d \n",input1.id, input1.titre,  input1.emprunteur, input1.categorie, input1.auteur, input1.dateemprunt);
     }   
-      
-    // read struct to file
-	
+    
+	infiletri = fopen ("livretri.dat", "r");
+    if (infiletri == NULL)
+    {
+        fprintf(stderr, "\nErreur ouverture du fichier livre tri \n");
+        exit(1);
+    }
+	printf("\n ----liste des livres TRIES par Titre----:\n");
+	while(fread(&input1, sizeof(struct livre), 1, infiletri))
+	{
+		printf (" id = -%d- titre = -%s- emprunteur -%s- categorie -%s- auteur -%s- datemprunt %d \n",input1.id, input1.titre,  input1.emprunteur, input1.categorie, input1.auteur, input1.dateemprunt);
+    }   
+    fclose (infiletri);  
+	 
 	printf("Donnez -svp- le titre du livre a emprunter :");
 	fflush( stdout );
-    	lire(title,30);
+    lire(title,30);
 	printf("titre: %s\n",title);
 	rewind(infile);
-
 	while(fread(&input1, sizeof(struct livre), 1, infile) && strcmp(input1.titre,title)!=0)
 	{
 	}   
@@ -184,13 +201,15 @@ void emprunter(){
 		exit(1);
 	}
 	if(strlen(input1.emprunteur)>1){
-		printf("Livre deja emprunte");
+		printf("Livre deja emprunte \n");
 		exit(1);
 	}
 
 	strcpy(input1.emprunteur, globaluser.username);
 	printf("info - emprunteur: %s\n",  input1.emprunteur);
 	printf("info - titre     : %s\n",  input1.titre);	
+	time(&my_time);
+	input1.dateemprunt = my_time;
 		
 	fseek(infile, -sizeof(struct livre), SEEK_CUR);
 	
@@ -198,51 +217,61 @@ void emprunter(){
 		 printf("Donnees enregistrees avec succces !\n");	 
     else
 		 printf("Erreur d ecriture des donnees !\n");
+	fclose (infile);
+	tri();
+	// input1.dateemprunt = getTimeMicroSec()/1000000;
 	
-	input1.dateemprunt = getTimeMicroSec()/1000000;
 	globaluser.nblivres ++;
 	fseek(globaluserfile, -sizeof(struct user), SEEK_CUR);
 	if(fwrite (&globaluser, sizeof(struct user), 1, globaluserfile) != 0)
 		printf("Votre emprunt a ete enregistre \n" );
 	else
         printf("\n Erreur de donnees  !\n");
-	
-	rewind (globaluserfile);
-	while(fread(&globaluser, sizeof(struct user), 1, globaluserfile))
-	{
-    }  	
-	fclose(globaluserfile);
-    fclose (infile);
+
+	return;
 }
 
 int restituer(){
 	FILE *infile;
+	FILE *infiletri;
     struct livre input1;
 	char title[30];
-	int nbemprunts;
-	unsigned long duree;
+	int duree;
+	time_t emprunt_time;
     // open file for writing
-    infile = fopen ("livre.dat", "r+");
+	tri();
+   
 	if (globaluser.nblivres==0){
 		printf("Vous n'avez pas de livres a restituer !");
 		exit(1);
 	}
 	printf("info : Restitution pour emprunteur %s\n",globaluser.username);
-    if (infile == NULL)
+	infiletri = fopen ("livretri.dat", "r");
+    if (infiletri == NULL)
     {
-        fprintf(stderr, "\nErreur ouverture du fichier \n");
+        fprintf(stderr, "\nErreur ouverture du fichier livre tri \n");
         exit(1);
     }
-	while(fread(&input1, sizeof(struct livre), 1, infile))
+	printf("\n --Liste des livres empruntes par >>> %s :\n", globaluser.username);
+	while(fread(&input1, sizeof(struct livre), 1, infiletri))
 	{
-		printf (" id = -%d- titre = -%s- emprunteur -%s- auteur -%s-\n", input1.id, 	input1.titre,input1.emprunteur, input1.auteur);
-    }   
-      
+		if(strcmp(input1.emprunteur, globaluser.username )==0) {
+		printf ("- id = -%d- titre = -%s emprunteur -%s- categorie -%s- auteur -%s- datemprunt %d \n", input1.id,  input1.titre, input1.emprunteur, input1.categorie, input1.auteur, input1.dateemprunt);
+		}   
+	}
+    fclose (infiletri);  
+	
+	infile = fopen ("livre.dat", "r+");  
+	if (infile == NULL)
+    {
+        fprintf(stderr, "\nErreur ouverture du fichier des livres \n");
+        exit(1);
+    }
     // read struct to file
 	
 	printf("Donnez -svp- le titre du livre a restituer :");
 	fflush( stdout );
-    	lire(title,30 );
+    lire(title,30 );
 	printf("titre: %s\n",title);
 	rewind(infile);
 
@@ -254,32 +283,34 @@ int restituer(){
 		printf("Nous n'avons pas ce livre");
 		exit(1);
 	}
+	printf("info - emprunteur: %s\n",  globaluser.username);
+	printf("info - titre     : %s\n",  input1.titre);	
+	
 	if(strcmp(input1.emprunteur, globaluser.username )!=0){
 		printf("Vous n avez pas emprunte ce livre\n");
 		exit(1);
 	}
 
-	strcpy(input1.emprunteur, "");
-	input1.dateemprunt=time(NULL);
-	printf("info - emprunteur: %s\n",  input1.emprunteur);
-	printf("info - titre     : %s\n",  input1.titre);	
-
-	
 	fseek(infile, -sizeof(struct livre), SEEK_CUR);
 	
 	if(fwrite (&input1, sizeof(struct livre), 1, infile) != 0)
-		 printf("Donnees enregistrees avec succces !\n");	 
+		 printf("Donnees restitution enregistrees avec succces !\n");	 
     else
 		 printf("Erreur d ecriture des donnees !\n");
-	 
-	input1.daterestitution = getTimeMicroSec()/1000000;
-	fin = (input1.daterestitution-input1.dateemprunt);
+	fclose (infile);
+	tri();
+	// input1.daterestitution = getTimeMicroSec()/1000000;
+	emprunt_time=input1.dateemprunt;
+	duree = duree_s(input1.dateemprunt);
+	printf("duree emprunt en secondes duree_s : %d \n",  duree);
 
-	if (fin > 180 && (globaluser.role==1) || fin > 120 && (globaluser.role==2))
-	{ printf("Vous avez depasse le temps autorise d'emprunt, vous serez interdit  		d'emprunt dorenavant !\n");
+	if (((duree > 180) && (globaluser.role==1)) || ((duree > 120) && (globaluser.role==2)))
+	{ printf("Vous avez depasse le temps autorise d'emprunt, vous serez interdit d emprunt dorenavant !\n");
 	  globaluser.retard=1;
 	}
     globaluser.nblivres --;
+	strcpy(input1.emprunteur, "");
+	input1.dateemprunt=0;
 	fseek(globaluserfile, -sizeof(struct user), SEEK_CUR);
 	if(fwrite (&globaluser, sizeof(struct user), 1, globaluserfile) != 0) {
 		printf("Vous avez restitue %s\n",  input1.titre);
@@ -288,8 +319,8 @@ int restituer(){
         printf("\n Erreur de donnees  !\n");
 	}
 	 	
-	fclose(globaluserfile);
-    	fclose (infile);
+	return;
+
 	}
 
 int ajoutlivre() {
@@ -330,11 +361,76 @@ int ajoutlivre() {
 	input1.dateemprunt=time(NULL);
 		
 	fwrite (&input1, sizeof(struct livre), 1, outfile);
-	if(fwrite != 0)
+	if(fwrite != 0) {
         printf("Donnees enregistrees avec succces !\n");
+	    tri();
+	}
     else
+	{
 		 printf("Erreur d ecriture des donnees !\n");
+	}
+	fclose (outfile);
+	tri();
+	return;
+}
+
+void tri() {
+	FILE *infile;
+	FILE *outfile;
+	char title[30];
+	char lasttitle[30];
+    long compt=1;
+	long i=1;
+	struct livre input1;
+	struct livre output1;
+	infile = fopen("livre.dat", "r");
+	outfile = fopen("livretri.dat", "w");
 	
+    fread(&input1, sizeof(struct livre), 1, infile);
+	strcpy(title,input1.titre);
+	strcpy(output1.titre, input1.titre);
+	strcpy(output1.categorie, input1.categorie);
+	strcpy(output1.auteur, input1.auteur);
+	strcpy(output1.emprunteur, input1.emprunteur);
+	output1.id=input1.id;
+	
+	while(fread(&input1, sizeof(struct livre), 1, infile))	{
+	compt++;
+	if (strcmp(input1.titre,title) < 0) {
+			strcpy(output1.titre, input1.titre);
+			strcpy(output1.categorie, input1.categorie);
+			strcpy(output1.auteur, input1.auteur);
+			strcpy(output1.emprunteur, input1.emprunteur);
+			output1.id=input1.id;
+			output1.dateemprunt=input1.dateemprunt;
+			strcpy(title,input1.titre);
+	}
+	};
+	fwrite (&output1, sizeof(struct livre), 1, outfile);
+	strcpy(lasttitle, title);
+	compt--;
+	while (i <= compt) {
+		rewind(infile);
+		strcpy(title,"zzzzzzzzz");
+	    while(fread(&input1, sizeof(struct livre), 1, infile))	{
+		if (strcmp(input1.titre,lasttitle) > 0) {
+		 if (strcmp(input1.titre,title) <= 0) {
+			strcpy(output1.titre, input1.titre);
+			strcpy(output1.categorie, input1.categorie);
+			strcpy(output1.auteur, input1.auteur);
+			strcpy(output1.emprunteur,input1.emprunteur);
+			output1.id=input1.id;
+			output1.dateemprunt=input1.dateemprunt;
+			strcpy(title,input1.titre);
+	    }
+		}
+		}		
+		fwrite (&output1, sizeof(struct livre), 1, outfile);
+		strcpy(lasttitle, title);
+		i++;		
+	}
+	fclose (outfile);
+	fclose (infile);
 }
 
 int login(){
@@ -369,21 +465,35 @@ int login(){
 		if(strcmp(input2.emprunteur, login)==0){
 			printf("Vous avez emprunte %s\n", input2.titre);
 		}
-    }   
+    } 
 	
+    while (action() !=9);
+	
+   return; 
+}
+
+
+int action(){
+	int operation;
 	operation = 0;
 	while(operation!=1 && operation!=2 && operation!=3 ){
 		printf("Operation souhaitee: \n 1-emprunter \n 2-restituer\n");
 		if(globaluser.role ==1) {
 			printf(" 3-Ajouter un livre\n");
 		}
+		printf(" 9-Quitter\n");
 		scanf("%d", &operation);
-		if(operation!=1 && operation !=2 && operation !=3){
-			printf("Action impossible!\n");
+		if(operation!=1 && operation !=2 && operation !=3 && operation !=9){
+			printf("Choix incorrect!\n");
+		}
+		if(operation==9){
+			printf("Deconnexion...");
 			exit(1);
-}
+		}
+			
+
 		if(operation ==1){
-			if((globaluser.role == 1 && globaluser.nblivres==maxprof ) || 		( globaluser.role == 2 && globaluser.nblivres==maxeleve )){
+			if((globaluser.role == 1 && globaluser.nblivres==maxprof ) || ( globaluser.role == 2 && globaluser.nblivres==maxeleve )){
 				printf("Vous ne pouvez pas emprunter car vous avez atteint 	votre quota\n Veuillez restituer un livre pour en emprunter un nouveau");
 				printf("\nDeconnexion...");
 				exit(1);
@@ -397,12 +507,10 @@ int login(){
 			 if( globaluser.role ==1) {
 			ajoutlivre();
 			 }
-		}
-		else{
-			printf("Choix incorrect");
-		}
+		};
+		
 	}
-    
+   return operation; 
 }
 
 int main(){
@@ -410,7 +518,7 @@ int main(){
 	int choix;
 	printf("------------Bibliotheque CY tech-------------\n");
 	printf("Bienvenue, veuillez faire un choix\n");
-	printf("1- Se connecter  \n2- Creer un compte\n");
+	printf("1- Se connecter  \n2- Creer un compte\n3- Quitter la bibliotheque\n");
 	scanf("%d", &choix);
 	if(choix==1){
 		login();
@@ -418,11 +526,14 @@ int main(){
 	else if(choix ==2){
 		creat();
 	}
+	else if(choix==3){
+		exit(1);
+	}
 	else{
 		printf("Ce choix n est pas autorise\n");
 		exit(1);
 	}
-	
+   fclose(globaluserfile);
 	exit(1);
 }
 

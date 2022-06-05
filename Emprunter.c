@@ -67,7 +67,7 @@ unsigned long duree_s(time_t xtime)
 
 
 
-int creat(){
+void creat(){
     char login[30];
     int i; 
     int digit = 0;
@@ -225,7 +225,7 @@ void emprunter(){
 	return;
 }
 
-int restituer(){
+void restituer(){
 	FILE *infile;
 	FILE *infiletri;
     struct livre input1;
@@ -316,7 +316,7 @@ int restituer(){
 
 	}
 
-int ajoutlivre() {
+void ajoutlivre() {
 	
 	FILE *outfile;
 	char title[30];
@@ -426,32 +426,40 @@ void tri() {
 	fclose (infile);
 }
 
-int login(){
+void login(){
 	FILE *infile;
 	struct livre input2;
 	char login[30];
 	char mdp[30];
 	int operation;
+	int boucle=0;
 	infile = fopen("livre.dat", "r");
 	globaluserfile = fopen("user.dat", "r+");
+	
+	do {
 	printf("Donnez votre pseudo:\n");
-	//clean_stdin();
+	clean_stdin();
+	strcpy (login,"");
 	scanf("%s",login);
+	boucle=0;
+	rewind(globaluserfile);
 	while(fread(&globaluser, sizeof(struct user), 1, globaluserfile) && strcmp(globaluser.username,login)!=0)
 	{
 	}
 	
 	if (strcmp(globaluser.username,login)!=0){
-		printf("ce login n'existe pas\n");
-		exit(1);
+		printf("ce login n'existe pas :%s \n", login );
+		boucle=1;
 	}
+	if (boucle==0) {
 	printf("Donnez votre mot de passe:\n");
 	//clean_stdin();
 	scanf("%s",mdp);
 	if(strcmp(globaluser.mdp, mdp)!=0){
 		printf("Mot de passe errone\n");
-		exit(1);
+		boucle=1;
 	}
+	 if (boucle==0) {
 	clean_stdin();
 	while(fread(&input2, sizeof(struct livre), 1, infile))
 	{
@@ -459,7 +467,10 @@ int login(){
 			printf("Vous avez emprunte %s\n", input2.titre);
 		}
     } 
-	
+	}
+	}
+	} while (boucle==1);
+	// appel de la fonction action
     while (action() !=9);
 	
    return; 

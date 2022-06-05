@@ -103,7 +103,7 @@ int creat(){
 	}
 	printf("Choisir votre mot de passe:\n");
 	while (complexe==0)	{
-		lire( globaluser.mdp,30);
+		lire(globaluser.mdp, 30);
 		for (i = 0; i < strlen(globaluser.mdp); i++) {
             if (isalpha(globaluser.mdp[i])) {
                 letter++;
@@ -131,7 +131,7 @@ int creat(){
 
     printf("Enregistrement en cours...\n");
     fwrite (&globaluser, sizeof(struct user), 1, outfile);
-    if(fwrite == 1){
+    if(fwrite !=0){
         printf("\nDonnees enregistrees avec succces !\n");
 	}
     else{

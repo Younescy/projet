@@ -141,7 +141,7 @@ void creat(){
 	 return;
 }
 
-void emprunter(){
+int emprunter(){
 	FILE *infile;
 	FILE *infiletri;
     struct livre input1;
@@ -225,7 +225,7 @@ void emprunter(){
 	return;
 }
 
-void restituer(){
+int restituer(){
 	FILE *infile;
 	FILE *infiletri;
     struct livre input1;
@@ -282,28 +282,30 @@ void restituer(){
 	
 	if(strcmp(input1.emprunteur, globaluser.username )!=0){
 		printf("Vous n avez pas emprunte ce livre\n");
-		exit(1);
 	}
-
+    else 
+	{
 	fseek(infile, -sizeof(struct livre), SEEK_CUR);
-	
-	if(fwrite (&input1, sizeof(struct livre), 1, infile) != 0)
-		 printf("Donnees restitution enregistrees avec succces !\n");	 
-    else
-		 printf("Erreur d ecriture des donnees !\n");
-	fclose (infile);
-	tri();
+	strcpy(input1.emprunteur,"");
 	emprunt_time=input1.dateemprunt;
 	duree = duree_s(input1.dateemprunt);
+	input1.dateemprunt=0;
 	printf("duree emprunt en secondes duree_s : %d \n",  duree);
-
+	if(fwrite (&input1, sizeof(struct livre), 1, infile) != 0)
+	{
+	printf("Donnees restitution enregistrees avec succces !\n"); 
+	fclose(infile);
+	tri();
+	} 
+    else
+	{ 
+     printf("Erreur d ecriture des donnees !\n");
+	}
 	if (((duree > 180) && (globaluser.role==1)) || ((duree > 120) && (globaluser.role==2)))
 	{ printf("Vous avez depasse le temps autorise d'emprunt, vous serez interdit d emprunt dorenavant !\n");
 	  globaluser.retard=1;
 	}
     globaluser.nblivres --;
-	strcpy(input1.emprunteur, "");
-	input1.dateemprunt=0;
 	fseek(globaluserfile, -sizeof(struct user), SEEK_CUR);
 	if(fwrite (&globaluser, sizeof(struct user), 1, globaluserfile) != 0) {
 		printf("Vous avez restitue %s\n",  input1.titre);
@@ -311,7 +313,7 @@ void restituer(){
 	else{
         printf("\n Erreur de donnees  !\n");
 	}
-	 	
+	} 	
 	return;
 
 	}

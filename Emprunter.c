@@ -129,7 +129,7 @@ int creat(){
         }
     }
 
-    printf("Enregistrement en cours...\n");
+    printf("Enregistrement en cours...\n Donnees enregistrees avec succes!");
     fwrite (&globaluser, sizeof(struct user), 1, outfile);
     if(fwrite !=0){
         printf("\nDonnees enregistrees avec succces !\n");

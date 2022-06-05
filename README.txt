@@ -11,17 +11,17 @@ BONUS: listing: si vous voulez avoir les infos qui sont dans les bases de donné
 il suffit de compiler et executer listing.c dès que vous voulez avoir ces infos.
 
 BONUS: Mot de passe complexe lors de la creation du compte.
+BONUS: FONCTION TRI par ordre alphabétique des titres.
 
 
   !!!!Attention!!!!!
-Lorsque l'on vous demande d'écrire une variable, il se peut que, après avoir appuyé sur Entrée, il ne se passe rien. Si cela arrive , veuillez simplement réecrire ce que vous venez d'écrire.
+Lorsque l'on vous demande d'écrire une variable, il se peut que, après avoir appuyé sur Entrée, il ne se passe rien. Si cela arrive , veuillez simplement réecrire ce que vous venez d'écrire et réappuyer sur Entrée.
 
 Exemple: 
 le programme vous demande de saisir le nom du livre que vous voulez ajouter à la liste de livre.
 Vous ecrivez le nom de ce livre , vous appuyez sur Entrée mais rien ne se passe.
-Réecrivez simplement le nom du livre que vous voulez ajouter. 
+Réecrivez simplement le nom du livre que vous voulez ajouter et réappuyez sur Entrée. 
 
-Nous avons essayé de faire le timer pour la restitution mais nous avons échoué.
 
 SI VOUS AVEZ UN QUELCONQUE PROBLEME:
 executez de nouveau les fichiers init_user.c et init_livres.c.

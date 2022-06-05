@@ -15,7 +15,7 @@ BONUS: FONCTION TRI par ordre alphabétique des titres.
 
 
   !!!!Attention!!!!!
-Lorsque l'on vous demande d'écrire une variable, il se peut que, après avoir appuyé sur Entrée, il ne se passe rien. Si cela arrive , veuillez simplement réecrire ce que vous venez d'écrire et réappuyer sur Entrée.
+Lorsque l'on vous demande d'écrire une variable, il se peut que, après avoir appuyé sur Entrée, il ne se passe rien. Si cela arrive , veuillez simplement réecrire ce que vous venez d'écrire et réappuyer sur Entrée ensuite.
 
 Exemple: 
 le programme vous demande de saisir le nom du livre que vous voulez ajouter à la liste de livre.

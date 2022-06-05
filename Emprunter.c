@@ -29,11 +29,6 @@ struct user{
 
 struct user globaluser;
 
-unsigned long getTimeMicroSec(){
-	struct timeval tv;
-	gettimeofday(&tv,NULL);
-	return(1000000 * tv.tv_sec) +tv.tv_usec;
-}
 void clean_stdin(void)
 {
     int c;
@@ -219,7 +214,6 @@ void emprunter(){
 		 printf("Erreur d ecriture des donnees !\n");
 	fclose (infile);
 	tri();
-	// input1.dateemprunt = getTimeMicroSec()/1000000;
 	
 	globaluser.nblivres ++;
 	fseek(globaluserfile, -sizeof(struct user), SEEK_CUR);
@@ -299,7 +293,6 @@ int restituer(){
 		 printf("Erreur d ecriture des donnees !\n");
 	fclose (infile);
 	tri();
-	// input1.daterestitution = getTimeMicroSec()/1000000;
 	emprunt_time=input1.dateemprunt;
 	duree = duree_s(input1.dateemprunt);
 	printf("duree emprunt en secondes duree_s : %d \n",  duree);
